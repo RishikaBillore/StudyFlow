@@ -18,3 +18,5 @@ It is built using **HTML, CSS, and JavaScript**.
 1. Clone the repository or download the ZIP file.  
 2. Open `index.html` in any web browser.  
 3. Start planning your studies with StudyFlow!
+## Live Demo
+[Click here to try StudyFlow](https://rishikabillore.github.io/StudyFlow/)  
