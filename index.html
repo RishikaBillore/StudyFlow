@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyFlow - Smart Study Planner</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+    <!-- Authentication Screen -->
+    <div id="authContainer" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>📚 StudyFlow</h1>
+                <p>Your smart companion for academic success</p>
+            </div>
+            
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form active">
+                <h2>Welcome Back</h2>
+                <form id="loginFormElement">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary auth-btn">Sign In</button>
+                </form>
+                <p class="auth-switch">
+                    Don't have an account? 
+                    <a href="#" id="showSignup">Sign up here</a>
+                </p>
+            </div>
+            
+            <!-- Signup Form -->
+            <div id="signupForm" class="auth-form">
+                <h2>Create Account</h2>
+                <form id="signupFormElement">
+                    <div class="form-group">
+                        <label for="signupName">Full Name</label>
+                        <input type="text" id="signupName" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupEmail">Email</label>
+                        <input type="email" id="signupEmail" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" placeholder="Create a password (min 6 characters)" minlength="6" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary auth-btn">Create Account</button>
+                </form>
+                <p class="auth-switch">
+                    Already have an account? 
+                    <a href="#" id="showLogin">Sign in here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application (hidden initially) -->
+    <div id="mainApp" class="container" style="display: none;">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>📚 StudyFlow</h1>
+                <p>Your smart companion for academic success</p>
+            </div>
+            <div class="header-controls">
+                <div class="user-info">
+                    <span id="userWelcome">Welcome back!</span>
+                    <button id="logoutBtn" class="btn btn-danger btn-small" title="Logout">
+                        🚪 Logout
+                    </button>
+                </div>
+                <button id="clearDataBtn" class="btn btn-danger btn-small" onclick="studyPlanner.clearAllData()" title="Clear All Data">
+                    🗑️ Clear Data
+                </button>
+                <button id="darkModeToggle" class="btn btn-icon" title="Toggle Dark Mode">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <button id="notificationToggle" class="btn btn-icon" title="Toggle Notifications">
+                    <span class="notification-icon">🔔</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Notification Permission Banner -->
+        <div id="notificationBanner" class="notification-banner" style="display: none;">
+            <p>Enable notifications to get reminders for your study tasks!</p>
+            <button id="enableNotifications" class="btn btn-small">Enable</button>
+            <button id="dismissBanner" class="btn btn-small btn-secondary">Dismiss</button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Panel - Add Task & Analytics -->
+            <div class="left-panel">
+                <!-- Add Task Card -->
+                <div class="card">
+                    <h2>
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Add New Study Goal
+                    </h2>
+                    <form id="taskForm">
+                        <div class="form-group">
+                            <label for="taskTitle">Task Title</label>
+                            <input type="text" id="taskTitle" placeholder="e.g., Complete Physics Assignment" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskDescription">Description</label>
+                            <textarea id="taskDescription" placeholder="Brief description of the task" rows="3"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="taskPriority">Priority</label>
+                                <select id="taskPriority">
+                                    <option value="low">Low Priority</option>
+                                    <option value="medium" selected>Medium Priority</option>
+                                    <option value="high">High Priority</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="taskSubject">Subject</label>
+                                <select id="taskSubject">
+                                    <option value="mathematics">Mathematics</option>
+                                    <option value="science">Science</option>
+                                    <option value="english">English</option>
+                                    <option value="history">History</option>
+                                    <option value="programming">Programming</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="dueDate">Due Date</label>
+                                <input type="datetime-local" id="dueDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="estimatedTime">Estimated Time (hours)</label>
+                                <input type="number" id="estimatedTime" min="0.5" step="0.5" value="1" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reminderTime">Reminder (minutes before due)</label>
+                            <select id="reminderTime">
+                                <option value="0">No reminder</option>
+                                <option value="15">15 minutes</option>
+                                <option value="30">30 minutes</option>
+                                <option value="60" selected>1 hour</option>
+                                <option value="120">2 hours</option>
+                                <option value="1440">1 day</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <svg class="icon" viewBox="0 0 24 24">
+                                <path d="M12 2v20M2 12h20"/>
+                            </svg>
+                            Add Task
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Analytics Card -->
+                <div class="card">
+                    <h2>
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.25h-15V5.75"/>
+                        </svg>
+                        Analytics Dashboard
+                    </h2>
+                    
+                    <!-- Stats Overview -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">📋</div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="totalTasks">0</span>
+                                <span class="stat-label">Total Tasks</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="completedTasks">0</span>
+                                <span class="stat-label">Completed</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⏳</div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="pendingTasks">0</span>
+                                <span class="stat-label">Pending</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🔥</div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="studyStreak">0</span>
+                                <span class="stat-label">Study Streak</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="progress-section">
+                        <div class="progress-header">
+                            <h3>Overall Progress</h3>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="charts-container">
+                        <div class="chart-card">
+                            <h4>Task Distribution</h4>
+                            <canvas id="priorityChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h4>Subject Progress</h4>
+                            <canvas id="subjectChart"></canvas>
+                        </div>
+                        <div class="chart-card full-width">
+                            <h4>Weekly Activity</h4>
+                            <canvas id="activityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Tasks & Timeline -->
+            <div class="right-panel">
+                <!-- Tasks Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>
+                            <svg class="icon" viewBox="0 0 24 24">
+                                <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5C3.9 4 3 4.9 3 6v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                            </svg>
+                            Study Tasks
+                        </h2>
+                        <div class="filter-controls">
+                            <select id="filterTasks">
+                                <option value="all">All Tasks</option>
+                                <option value="pending">Pending</option>
+                                <option value="completed">Completed</option>
+                                <option value="overdue">Overdue</option>
+                            </select>
+                            <select id="sortTasks">
+                                <option value="dueDate">Sort by Due Date</option>
+                                <option value="priority">Sort by Priority</option>
+                                <option value="created">Sort by Created</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="task-list" id="taskList">
+                        <div class="empty-state">
+                            <svg class="empty-icon" viewBox="0 0 24 24">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <h3>No tasks yet!</h3>
+                            <p>Add your first study goal to get started on your academic journey.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline Card -->
+                <div class="card timeline-card">
+                    <h2>
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        Recent Activity
+                    </h2>
+                    <div class="timeline" id="timeline">
+                        <div class="timeline-empty">
+                            <p>Your activity will appear here as you complete tasks and reach milestones.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" onclick="document.getElementById('taskTitle').focus()" title="Add New Task" style="display: none;">
+        <svg viewBox="0 0 24 24">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+        </svg>
+    </button>
+
+    <!-- Task Detail Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Task Details</h2>
+                <button class="btn btn-icon" onclick="closeTaskModal()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="modalBody" class="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Pomodoro Timer Modal -->
+    <div id="pomodoroModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Pomodoro Timer</h2>
+                <button class="btn btn-icon" onclick="closePomodoroModal()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="pomodoro-timer">
+                    <div class="timer-display">
+                        <span id="timerMinutes">25</span>:<span id="timerSeconds">00</span>
+                    </div>
+                    <div class="timer-controls">
+                        <button id="startTimer" class="btn btn-primary">Start</button>
+                        <button id="pauseTimer" class="btn btn-secondary">Pause</button>
+                        <button id="resetTimer" class="btn">Reset</button>
+                    </div>
+                    <div class="timer-settings">
+                        <label>
+                            Work Duration: <input type="number" id="workDuration" value="25" min="1" max="60"> minutes
+                        </label>
+                        <label>
+                            Break Duration: <input type="number" id="breakDuration" value="5" min="1" max="30"> minutes
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
